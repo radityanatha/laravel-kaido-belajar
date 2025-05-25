@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PatientAppointmentResource\Pages;
-use App\Filament\Resources\PatientAppointmentResource\RelationManagers;
 use App\Models\PatientAppointment;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -23,21 +23,31 @@ class PatientAppointmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('patient_id')
+                Forms\Components\Select::make('patient_id')
+                    ->relationship('patient', 'name')
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('doctor_id')
-                    ->required()
-                    ->numeric(),
+                    ->searchable(),
+
+                Forms\Components\Select::make('doctor_id')
+                    ->relationship('doctor', 'name')
+                    ->required(),
+
                 Forms\Components\DatePicker::make('date_of_appointment')
                     ->required(),
+
                 Forms\Components\Textarea::make('note')
                     ->columnSpanFull(),
+
                 Forms\Components\Textarea::make('prescription')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255),
+
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'jadwal dibuat' => 'Jadwal Dibuat',
+                        'selesai periksa' => 'Selesai Periksa',
+                        'obat sudah diserahkan' => 'Obat Sudah Diberikan'
+                    ])
+                    ->required(),
             ]);
     }
 
@@ -45,25 +55,29 @@ class PatientAppointmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('patient_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('patient.name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('doctor_id')
-                    ->numeric()
+
+                Tables\Columns\TextColumn::make('doctor.name')
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('date_of_appointment')
                     ->date()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('status')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -74,8 +88,7 @@ class PatientAppointmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-   Tables\Actions\DeleteAction::make(),
-
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
