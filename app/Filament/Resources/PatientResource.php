@@ -30,10 +30,10 @@ class PatientResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gender')
-                ->options([
-                    'Laki-laki' => 'Laki-laki',
-                    'Perempuan' => 'Perempuan',
-                ]),
+                    ->options([
+                        'Laki-laki' => 'Laki-laki',
+                        'Perempuan' => 'Perempuan',
+                    ]),
                 Forms\Components\DatePicker::make('date_of_birth')
                     ->required(),
                 Forms\Components\TextInput::make('address')
@@ -75,7 +75,7 @@ class PatientResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-   Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make(),
 
             ])
             ->bulkActions([
