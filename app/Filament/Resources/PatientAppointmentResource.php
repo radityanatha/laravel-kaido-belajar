@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use auth;
 
 class PatientAppointmentResource extends Resource
 {
@@ -54,6 +55,20 @@ class PatientAppointmentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+
+            ->modifyQueryUsing(function (Builder $query) {
+                $isDoctor = Auth::user()->hasRole('Dokter');
+                $isApoteker = Auth::user()->hasRole('Apoteker');
+
+                if ($isDoctor) {
+                    $userId = Auth::user()->id;
+                    $query->where('doctor_id', $userId);
+                }
+
+                if ($isApoteker) {
+                    $query->where('status', 'selesai periksa')->orWhere('status', 'obat sudah diserahkan');
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('patient.name')
                     ->sortable(),
