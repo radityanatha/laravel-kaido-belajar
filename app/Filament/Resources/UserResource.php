@@ -21,6 +21,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\ExportBulkAction;
 use App\Filament\Resources\UserResource\Pages;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 use Filament\Infolists\Components\Section as InfolistSection;
 
@@ -34,16 +36,33 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Section::make(
-                    'User Information'
-                )->schema([
-                            TextInput::make('name')
-                                ->required(),
-                            TextInput::make('email')
-                                ->required(),
-                            TextInput::make('password')
-                                ->required(),
-                        ]),
+                Section::make('User Information')->schema([
+                    TextInput::make('name')
+                        ->required(),
+
+                    TextInput::make('email')
+                        ->email()
+                        ->required(),
+
+                    TextInput::make('email_verified_at')
+                        ->label('Email Verified At')
+                        ->default(now())
+                        ->dehydrated(fn($state) => filled($state))
+                        ->visible(fn(string $context): bool => $context === 'edit'),
+
+                    Select::make('roles')
+                        ->relationship('roles', 'name')  // Diperbaiki dari relationshi
+                        ->multiple()
+                        ->preload()
+                        ->required(),
+
+                    TextInput::make('password')
+                        ->password()
+                        ->maxLength(255)
+                        ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                        ->dehydrated(fn($state) => filled($state))
+                        ->required(fn(string $context): bool => $context === 'create'),
+                ]),
             ]);
     }
 
